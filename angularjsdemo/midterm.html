@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script>
+        var app = angular.module("mainApp", []);
+        app.controller("mainCtrl",["$scope", function ($scope) {
+
+        }]);
+        app.directive("isolatedElem", function () {
+            return {
+                restrict: E,
+                templateUrl: "isolated-element.html",
+                scope: {
+
+                },
+                controller: ["$scope", function($scope){
+                    $scope.name = "Tom"
+                }]
+            }
+        })
+    </script>
+</head>
+<body ng-app="mainApp">
+<isolated-elem></isolated-elem>
+</body>
+</html>

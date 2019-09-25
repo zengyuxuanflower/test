@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Homework_Yuxuan</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script type="text/javascript" src="js/angular-route.min.js"></script>
+
+    <script>
+        var app = angular.module("mainApp",[]);
+        app.controller("mainCtrl", ["$scope", "$http",function($scope, $http){
+
+            $http.get("http://localhost:3000/employees") // will return something like promise (response), get data from backend
+                .then(function (res) {
+                    $scope.personList = res.data;
+
+                });
+
+            $scope.addEmployee = function (employee) {
+                $http.post("http://localhost:3000/employees", employee)
+                    .then(function (res) {
+                        $scope.personList = res.data;
+                        console.log(res);
+                    });
+
+            };
+
+            $scope.deleteEmployee = function (name) {
+                $http.delete("http://localhost:3000/employees/"+ name)
+                    .then(function (res) {
+                        $scope.personList = res.data;
+                        console.log(res);
+                    });
+
+            };
+
+
+            $scope.getCurrentEmployee = function(name) {
+                $http.get("http://localhost:3000/employees/" + name)
+                    .then(function (res) {
+                        $scope.currentEmployee = res.data;
+                        console.log($scope.currentEmployee);
+                    });
+            };
+
+            $scope.editCurrentEmployee = function (currentemployee) {
+                console.log('age is: ');
+                console.log(currentemployee.age);
+                $http.put("http://localhost:3000/employees/", currentemployee)
+                    .then(function (res) {
+                        $scope.personList = res.data;
+                        console.log('yeah!');
+                        console.log(res);
+                    });
+                $scope.currentEmployee = null;
+
+            };
+
+            $scope.col="id";
+            $scope.des=false;
+
+            $scope.changeOrderByCol = function (col) {
+                $scope.col = col;
+                $scope.des = !$scope.des;
+            };
+
+            $scope.$watch("filterObj.age", function(newVal){
+                if(newVal === null){
+                    $scope.filterObj.age = undefined;
+                }
+            });
+
+
+            // $scope.currentEmployee = $scope.editService.getEmployee(); // receive data from service
+            // console.log($scope.currentEmployee);
+            //
+            // // $scope.delete = function($index){
+            // //     $scope.personList.splice($index, 1);
+            // // };
+            // $scope.getCurrentEmployee = function(employee){
+            //     $scope.editService.setEmployee(employee);
+            // }
+
+
+        }]);
+
+        // $scope.editService = editService;
+        // app.factory("editService", function () {
+        //     var emp = {};
+        //     return {
+        //
+        //         getEmployee: function() {
+        //             return emp;
+        //
+        //         },
+        //
+        //         setEmployee: function (e) {
+        //             emp = e;
+        //         }
+        //     };
+        // });
+
+        app.filter("ageFilter", function () {
+            return function (persons, min, max) {
+                min = min || 0;
+                max = max || Number.MAX_VALUE;
+                if (persons === undefined) {return;}
+                else return persons.filter(function(person) {
+                    return person.age >= min && person.age <= max;
+                });
+            };
+        });
+    </script>
+
+    <style>
+        input[type=text]:disabled {
+            background: #dddddd;
+        }
+    </style>
+
+
+</head>
+<body ng-app="mainApp">
+    <div class="container" ng-controller="mainCtrl">
+    <h1>Homework - AngularJS(Part I)</h1>
+        <hr>
+        <h1>Preview</h1>
+        <hr>
+        <h3>All Employee Information</h3>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th><button class="btn btn-link" ng-click="changeOrderByCol('name')">Name</button></th>
+                    <th><button class="btn btn-link" ng-click="changeOrderByCol('age')">Age</button></th>
+                    <th><button class="btn btn-link" ng-click="changeOrderByCol('city')">City</button></th>
+                    <th><button class="btn btn-link" ng-click="changeOrderByCol('state')">State</button></th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            <tr ng-repeat="employee in personList | orderBy: col : des | filter: filterObj | ageFilter : minAge : maxAge">
+                <td>{{ employee.name }}</td>
+                <td>{{ employee.age  }}</td>
+                <td>{{ employee.address.city }}</td>
+                <td>{{ employee.address.state }}</td>
+                <td>
+                    <button class="btn btn-link" ng-click="getCurrentEmployee(employee.name)">Edit</button>
+                    <button class="btn btn-link" ng-click="deleteEmployee(employee.name)">Delete</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <hr>
+        <h4>Age Filter</h4>
+            <div class="column">
+                <p>Min <br><input type="number" ng-model="minAge"> </p>
+            </div>
+
+        <div class="column">
+            <p>Max <br> <input type="number" ng-model="maxAge"></p>
+        </div>
+
+        <h3>Add an employee</h3>
+            <p>Name: <br><input type="text" ng-model="employee.name" size="100"></p>
+            <p>Age: <br><input type="text" ng-model="employee.age" size="100"></p>
+            <p>City: <br><input type="text" ng-model="employee.address.city" size="100"></p>
+            <p>State: <br><input type="text" ng-model="employee.address.state" size="100"></p>
+                <button class="btn btn-primary" id="submit" ng-click="addEmployee(employee)">Submit</button>
+
+        <div ng-if="currentEmployee">
+            <h3>Edit employee</h3>
+                <p>Name: <br><input type="text" ng-model="currentEmployee.name" size="100" disabled="disabled"></p>
+                <p>Age: <br><input type="text" ng-model="currentEmployee.age" size="100" ></p>
+                <p>City: <br><input type="text" ng-model="currentEmployee.address.city" size="100" ></p>
+                <p>State: <br><input type="text" ng-model="currentEmployee.address.state" size="100" ></p>
+                    <button class="btn btn-primary" id="edit" ng-click="editCurrentEmployee(currentEmployee)">Submit</button>
+        </div>
+    </div>
+
+</body>
+</html>

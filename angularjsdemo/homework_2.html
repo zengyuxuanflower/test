@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo 10</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script type="text/javascript" src="js/angular-route.min.js"></script>
+    <script>
+        var app = angular.module("mainApp", ['ngRoute']);
+        app.controller("mainCtrl", ["$scope","$rootScope", function($scope, $rootScope) {
+            $rootScope.currentEmployee = null;
+        }]);
+
+        app.config(["$routeProvider", function ($routeProvider) {
+            $routeProvider.when("/home", {
+                templateUrl: "template/all_employee.html",
+                controller: "homeCtrl"
+            }).when("/add", {
+                templateUrl: "template/add_employee.html",
+                controller: "addCtrl"
+            }).when("/edit", {
+                templateUrl: "template/edit_employee.html",
+                controller: "editCtrl"
+            }).otherwise({
+                redirectTo: "/home"
+            });
+
+        }]);
+
+        app.controller("homeCtrl", ["$scope", "$http","editService", function ($scope, $http, editService) {
+            $scope.editService = editService;
+
+            $http.get("http://localhost:3000/employees") // will return something like promise (response), get data from backend
+                .then(function (res) {
+                    $scope.personList = res.data;
+
+                });
+
+            $scope.deleteEmployee = function (name) {
+                $http.delete("http://localhost:3000/employees/"+ name)
+                    .then(function (res) {
+                        $scope.personList = res.data;
+                        console.log(res);
+                    });
+            };
+
+            $scope.getCurrentPerson = function(person){                         // pass currentPerson to service
+                $scope.editService.setPerson(person);
+            };
+
+            $scope.getCurrentEmployee = function(name) {
+                $http.get("http://localhost:3000/employees/" + name)
+                    .then(function (res) {
+                        $scope.currentEmployee = res.data;
+                        console.log("currentEmployee: ", $scope.currentEmployee);
+
+                        $scope.editService.setPerson($scope.currentEmployee);
+                        console.log("current employee passed to service!");
+                    });
+            };
+
+
+
+            $scope.col="id";
+            $scope.des=false;
+
+            $scope.changeOrderByCol = function (col) {
+                $scope.col = col;
+                $scope.des = !$scope.des;
+            };
+
+            $scope.$watch("filterObj.age", function(newVal){
+                if(newVal === null){
+                    $scope.filterObj.age = undefined;
+                }
+            });
+
+            $scope.$watch("filterObj.name", function (newVal) {
+                if(newVal === null){
+                    $scope.filterObj.name = undefined;
+                }
+
+            });
+
+            $scope.$watch("filterObj.address.city", function (newVal) {
+                if(newVal === null){
+                    $scope.filterObj.address.city = undefined;
+                }
+
+            });
+
+            $scope.$watch("filterObj.address.state", function (newVal) {
+                if(newVal === null){
+                    $scope.filterObj.address.state = undefined;
+                }
+
+            });
+
+        }]);
+
+        app.controller("addCtrl", ["$scope","$http" , function ($scope, $http) {
+            $scope.addEmployee = function (employee) {
+                $http.post("http://localhost:3000/employees", employee)
+                    .then(function (res) {
+                        $scope.personList = res.data;
+                        console.log(res);
+                    });
+
+            };
+
+        }]);
+
+        app.factory("editService", function(){                                  // service used to pass data btw homeCtrl and editCtrl
+            var person ={};
+            return{
+                setPerson:function (p){
+                    person = p;
+                },
+                getPerson: function(){
+                    return person;
+                }
+            };
+        })
+
+        app.controller("editCtrl", ["$scope","$http" ,"editService", function ($scope, $http, editService) {
+
+            $scope.editService = editService;
+
+            $scope.currentEmployee=$scope.editService.getPerson();
+
+            console.log($scope.currentEmployee)
+
+            $scope.editCurrentEmployee = function (currentemployee) {
+                console.log('age is: ');
+                console.log(currentemployee.age);
+                $http.put("http://localhost:3000/employees/", currentemployee)
+                    .then(function (res) {
+                        $scope.personList = res.data;
+                        console.log('yeah!');
+                        console.log(res);
+                    });
+                $scope.currentEmployee = null;
+
+            };
+
+        }]);
+
+        app.filter("ageFilter", function () {
+            return function (persons, min, max) {
+                min = min || 0;
+                max = max || Number.MAX_VALUE;
+                if (persons === undefined) {return;}
+                else return persons.filter(function(person) {
+                    return person.age >= min && person.age <= max;
+                });
+            };
+        });
+
+        app.directive("myAttr", function () { //function to create directive factory
+            return {
+                restrict: "A",
+                templateUrl: "template/search_by.html",
+                replace: true,
+                controller: ["$scope", function ($scope) {
+                    $scope.searchbys = ["Name", "City", "State"];
+
+                }],
+                scope: false
+            };
+        });
+
+        app.directive("myElem", function () {
+            return {
+                templateUrl: "template/age_filter.html",
+                scope: false,
+                controller: ["$scope",function ($scope) {
+
+                }]
+            };
+        });
+
+
+    </script>
+
+    <style>
+        input[type=text]:disabled {
+            background: #dddddd;
+        }
+    </style>
+</head>
+<body ng-app="mainApp">
+<div class="container" ng-controller="mainCtrl">
+    <h1>Homework - AngularJS(Part II)</h1>
+    <hr>
+
+    <nav class="navbar navbar-default">
+        <!--use # to prevent it from reloading to different pages-->
+        <a href="#home">Home</a>
+        <a href="#add">Add</a>
+    </nav>
+    <div ng-view>
+        <!--a place holder for the content-->
+
+    </div>
+</div>
+</body>
+</html>

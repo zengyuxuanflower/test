@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo07</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script type="text/javascript" src="js/angular-resource.min.js"></script>
+    <script type="text/javascript" src="js/angular-sanitize.min.js"></script>
+
+    <script>
+        var app = angular.module("mainApp",["ngResource", "ngSanitize"]); //[] is used for importing modules
+        app.controller("mainCtrl", ["$scope", "$http", "$resource","$location","$sce",function ($scope, $http, $resource,$location,$sce) {
+            $http.get("http://localhost:3000/persons") // will return something like promise (response), get data from backend
+                .then(function (res) {
+                    $scope.personList = res.data;
+
+                });
+            $scope.getCurrentPerson = function($index) {
+                $http.get("http://localhost:3000/persons/" + $index)
+                    .then(function (res) {
+                        $scope.currentPerson = res.data;
+                    });
+            };
+
+            $scope.addPerson = function () {
+                $http.post("http://localhost:3000/persons", $scope.p)
+                    .then(function (res) {
+                        $scope.personList = res.data;
+                    });
+            };
+        //    resource URI: http://localhost:3000/persons
+            var personResource = $resource("http://localhost:3000/persons"); // a special object representing the resource
+            //action: get(one), query(collection), save(like post), delete
+            // $resource is built on $http
+
+            personResource.query().$promise
+                .then(function (res) {
+                    console.log(res);
+                });
+
+            $scope.currentURL = $location.absUrl();
+
+            $scope.htmlMsg = "<span style='color: red;'><b>This is a bold red line !</b></span>";
+            $scope.secureMsg = $sce.trustAsHtml($scope.htmlMsg);
+        }]);
+    </script>
+
+</head>
+<body ng-app="mainApp">
+
+<div class="container" ng-controller="mainCtrl">
+    <h1>Angular Built in services</h1>
+    <hr>
+    <h2>Service: $http</h2>
+    <div class="row">
+        <div class="col-sm-4">
+            <h4>All persons</h4>
+            <ul>
+                <li ng-repeat="person in personList">
+                    <span ng-click="getCurrentPerson($index)">
+                        {{ person.name }} : {{ person.city }}, {{person.country}}
+                        'test!'
+                    </span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="col-sm-4" ng-if="currentPerson">
+            <h4>Current Person</h4>
+            <p>Name: {{ currentPerson.name}}</p>
+            <p>City: {{ currentPerson.city}}</p>
+            <p>Country: {{ currentPerson.country}}</p>
+        </div>
+
+        <div class="col-sm-4">
+            <!--ADD A Person to the backend server-->
+            <!--when user type something, it will be wrapped the input as a p object-->
+            <h4>Add a person</h4>
+            <p>Name: <input type="text" ng-model="p.name"></p>
+            <p>City: <input type="text" ng-model="p.city"></p>
+            <p>Country: <input type="text" ng-model="p.country"></p>
+            <button class="btn btn-primary" ng-click="addPerson()">Add</button>
+        </div>
+
+
+    </div>
+    <hr>
+    <h2>Serveice: $location</h2>
+    <p>Current URL: {{ currentURL }} </p>
+        <!--One way binding-->
+    <p>{{ htmlMsg }}</p>
+    <p ng-bind="htmlMsg"></p>
+        <!--import a module ng-sanitize to use htmlMsg -->
+    <p ng-bind-html="htmlMsg"></p>
+    <p ng-bind-html="secureMsg"></p>
+
+
+</div>
+</body>
+</html>

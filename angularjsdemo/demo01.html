@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo01</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script>
+     //   Directive
+        //  ng-app: in general, we will only have one in one file, if there'are multiple ones, only the first one will be initialized/bootstrapped by Angularjs
+        //  angular
+        //  application module
+
+        var app = angular.module("mainApp", []);// create an angular application (a module object assigned to var app), //    dependency module
+
+        // dependency injection ->($scope), only to Angular function
+        // $scope: every controller has its own copy
+        // services: ($scope, $log) all controller share one copy (singleton), within same angular application, only one copy of the object (save memory)
+        app.controller("mainCtrl", function($scope, $log){ // constructor to create a controller object
+            //data -> model
+            //html ->view
+
+            //one-way binding: Model -> View
+
+            $scope.message = "hello world";
+            $scope.change = function () {
+                $scope.message = "Message got changed!";
+            }
+
+            $scope.changeName = function () {
+                $scope.name = "New Name";
+
+            }
+        });
+
+
+     // constructor function, usually we have this
+     //var anotherCtrl = new A(); (invoked by Angular)
+     // ac = anotherCtrl
+        app.controller("anotherCtrl", function($scope, $log){
+            $scope.message = "ddd";
+
+            // controller as-->
+            this.msg = "Another Hello World!"
+        });
+
+
+    </script>
+</head>
+<body ng-app="mainApp">
+    <div class="container" ng-controller="mainCtrl">
+        <h1>Angular Data Binding</h1>
+        <hr>
+        <h2>One Way Binding</h2>
+        <div>
+            <!--One Way Binding, directly use message here-->
+            <p>Message: {{ message }}</p>
+            <button ng-click="change()">Change</button>
+
+        </div>
+
+
+
+        <!--follow angular structure and input message directly-->
+        <h2>Two way binding</h2>
+        <div>
+
+            <p>Name: <input type="text" ng-model="name"></p>
+                <!--data-> model-->
+            <!--html-> view-->
+            <!--ng-model: view -> model, angular will create a name on $scope.name, and will detect changes on input box and change $scope.name -->
+            <!-- model-> view . ng-model will update input with new data-->
+            <p>Your name is: {{name}}</p>
+            <button ng-click="changeName()">Change Name</button>
+        </div>
+            <hr>
+            <h2>One Time Binding</h2>
+            <p><input type="range" ng-model="count"></p>
+            <p>Count: {{ count }}</p>
+            <p>Fixed Count: {{::count}}</p>
+
+    </div>
+
+
+    <div class="container" ng-controller="anotherCtrl as ac">
+        <p>Message: {{ message }}</p>
+        <p>Can you see me</p>
+            <p>{{ ac.msg }}</p>
+
+    </div>
+</body>
+
+</html>

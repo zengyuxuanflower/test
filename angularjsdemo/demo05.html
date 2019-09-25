@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo05</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script>
+        var app = angular.module("mainApp",[])
+        app.controller("mainCtrl", ["$scope","$rootScope", function ($scope,$rootScope) {
+            // how to communicate between different controllers
+            // 1. $Rootscope (singleton, a service, need to be injected), all the $scopes are inheriting $Rootscope, namely
+            // $Rootscope.isPrototypeOf($scope)
+            // $scope.person.name
+            // $scope.person.name = "Bob";
+            $rootScope.person = {
+              name: ""
+            };
+            $scope.$on("updatex", function (event, val) {
+               $scope.$broadcast("updatey", val); // it will broadcast an event down to its descendants (first and second controller)
+            });
+
+        }]);
+
+        app.controller("firstCtrl", ["$scope", "address", function ($scope, address) { //"address",
+        // 2.$emit, $broadcast, $on
+            $scope.$watch("x", function (newVal, oldVal) {
+                $scope.$emit("updatex", newVal); //emit an event up to it ancestors
+            });
+            $scope.x = 0;
+            $scope.address = address;
+        }]);
+
+        app.controller("secondCtrl", ["$scope","address", function ($scope, address){
+
+            $scope.$on("updatey", function (event, val) {
+                $scope.y = 2 * val + 3;
+
+            });
+            $scope.address = address;
+        }]);
+
+        //3. use service as bridge, singleton, available in current module
+        // can be used anywhere inside this Angularjs
+        app.value("address", {
+            city: "Princeton",
+            state: "NJ"
+
+        })
+    </script>
+
+</head>
+<body ng-app="mainApp">
+    <div class="container" ng-controller="mainCtrl">
+        <h1>Communication between controllers(scopes)</h1>
+        <hr>
+        <div ng-controller="firstCtrl">
+            <p>Name: <input type="text" ng-model="person.name"></p>
+            <p>x: <input type="number" ng-model="x"></p>
+            <p>City: <input type="text" ng-model="address.city"></p>
+            <p>State: <input type="text" ng-model="address.state"></p>
+        </div>
+
+        <div ng-controller="secondCtrl">
+            <p>Name: {{person.name}}</p>
+            <p>y = 2 * x + 3: {{ y }}</p>
+            <p>City: {{ address.city }}</p>
+            <p>State: {{ address.state }}</p>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

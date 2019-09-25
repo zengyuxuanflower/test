@@ -1,0 +1,51 @@
+<h3>All Employee Information</h3>
+
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th><button class="btn btn-link" ng-click="changeOrderByCol('name')">Name</button></th>
+        <th><button class="btn btn-link" ng-click="changeOrderByCol('age')">Age</button></th>
+        <th><button class="btn btn-link" ng-click="changeOrderByCol('city')">City</button></th>
+        <th><button class="btn btn-link" ng-click="changeOrderByCol('state')">State</button></th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    <tr ng-repeat="employee in personList | orderBy: col : des | ageFilter : minAge : maxAge | filter: filterObj">
+        <td>{{ employee.name }}</td>
+        <td>{{ employee.age  }}</td>
+        <td>{{ employee.address.city }}</td>
+        <td>{{ employee.address.state }}</td>
+        <td>
+            <a ng-click="getCurrentEmployee(employee.name)" href="#edit">Edit</a>
+            <button class="btn btn-link" ng-click="deleteEmployee(employee.name)">Delete</button>
+        </td>
+    </tr>
+    </tbody>
+
+</table>
+
+
+    <!--<h4>Search By Name, City, State</h4>-->
+    <!--<div search-by>-->
+        <!--<select ng-model="selectedName" ng-options="searchby for searchby in searchbys"></select>-->
+        <!--<p ng-if="selectedName=='Name'">Search by Name <br> <input type="text" ng-model="$parent.filterObj.name"></p>-->
+        <!--<p ng-if="selectedName=='State'">Search by State <br> <input type="text" ng-model="$parent.filterObj.address.state"></p>-->
+        <!--<p ng-if="selectedName=='City'">Search by City <br> <input type="text" ng-model="$parent.filterObj.address.city"></p>-->
+    <!--</div>-->
+
+
+    <!--<h4>Age Filter</h4>-->
+    <!--<div class="column">-->
+        <!--<p>Min <br><input type="text" ng-model="minAge"> </p>-->
+    <!--</div>-->
+
+    <!--<div class="column">-->
+        <!--<p>Max <br> <input type="text" ng-model="maxAge"></p>-->
+    <!--</div>-->
+
+<br>
+<div my-attr></div>
+<br>
+<my-elem></my-elem>

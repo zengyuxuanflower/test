@@ -1,0 +1,7 @@
+<div>
+    <h4>Search By Name, City, State</h4>
+    <select ng-model="selectedName" ng-options="searchby for searchby in searchbys"></select>
+    <p ng-if="selectedName=='Name'">Search by Name <br> <input type="text" ng-model="$parent.filterObj.name"></p>
+    <p ng-if="selectedName=='State'">Search by State <br> <input type="text" ng-model="$parent.filterObj.address.state"></p>
+    <p ng-if="selectedName=='City'">Search by City <br> <input type="text" ng-model="$parent.filterObj.address.city"></p>
+</div>

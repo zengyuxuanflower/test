@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo03</title>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script>
+
+        // https://www.ng-newsletter.com/posts/directives.html
+        // http://teropa.info/blog/2015/06/09/transclusion.html
+        // http://tutorials.jenkov.com/angularjs/custom-directives.html
+        var app = angular.module("mainApp", []);
+        app.controller("mainCtrl", ["$scope", function ($scope) {
+            $scope.person = {
+                name: "Alex",
+                age: 20
+            };
+            $scope.displayPerson = function () {
+                return "This is method";
+            };
+            $scope.arr = [1, 2, 3, 4, 5];
+
+        }]);
+        app.directive("myAttr", function () { //function to create directive factory
+            return { // configuration object
+                // interview point as follows:
+                restrict: "A", // default: AE, A: ATTRIBUTE, C: CLASS, M: COMMENT, E: ELEMENT, how can you use to your custom directive in four ways
+                template: "<div><p> This is an attribute directive </p> <p>{{name}}</p> </div>",
+                replace: true,// replace host element or render child element, can only restrict one element in template: two p will be error! Use a div, default is false
+                controller: ["$scope", function ($scope) {
+                    $scope.name = "Bob";
+                    // $scope === mainCtrl.$scope
+                }],// for custom directive
+                scope: false // default value of scope is false, unless you want to create your own scope. Use parent scope.
+            };
+        });
+        app.directive("myElem", function () {
+            return {
+                template: "<p> This is an element directive </p> <p>{{name}}</p>",
+                scope: true, // default to be false, if true, it will create its own scope which inherits its parents scope
+                controller: ["$scope",function ($scope) {
+                    $scope.name = "Alice"; // overwrite Bob
+                //    mainCtrl.$scope.isPrototypeOf($scope)
+
+                }]
+            };
+        });
+
+        app.directive("isolatedElem",function () {
+            return {
+                templateUrl: "isolated-element.html",
+                scope:{
+                    // important! remember!
+                    parentName: '@', // string (one way binding)
+                    parentPerson: '=', // object, two way binding
+                    parentDisplayPerson: '&' // function binding
+                }, // *interview: isolated scope from the parents, create own scope which is isolated from parent (cannot find the name through the prototype chain
+                controller: ["$scope", function ($scope) {
+                    $scope.name = "Tom";
+                    // $scope = {}
+                }]
+            }
+
+        });
+
+        app.directive("anotherElem",function () {
+            return {
+                template: "<p class='some-class'>This is another elem directive. <ng-transclude></ng-transclude> </p>", // from parent to child pass html
+                // The transclude option changes the way scopes are nested.
+                // It makes it so that the contents of a transcluded directive have whatever scope is outside the directive, rather than whatever scope is on the inside.
+                transclude: true,// transfer and include, You want to include some content from one template to another.
+                // ********** important interview question
+                // directive process phase: 1 compile (work on template DOM)  2. link (5 instance DOM). pre link function and post link function.
+                // if you write "link" as follows it is post link function
+
+                scope: {
+                    // same as '=i'
+                    i: '='
+                },
+
+
+                compile: function (tElem,tAttrs) { // have access to two attributes: 1. tElem 2. tAttrs
+                    // console.log(tElem); // jQuery Object.  (Angular will use a small compact version of jQuery (built-in): jqLite.)
+                    // console.log(tAttrs);
+                    console.log("compile executed!")
+                    tElem.css("color", "red"); // add a style attribute : style="color:red"
+                    tElem.attr("onclick", "alert('t click');"); // onclick="alert('tclicked');"
+
+                //    compile is very useful to manipulate DOM (like in jQuery)
+                    return {
+                        // compile will try to return an object which contains both pre and post function to you
+                        pre: function ( $scope, iElems, iAttrs) { // have access to $scope
+                            if($scope.i % 2 === 0){ // i ==2 or i==4
+                                iElems.css("font-size", "20pt");
+                                iElems.find("p").css("background-color", "pink");
+
+                            }
+                            console.log($scope.i, " : pre link executed!");
+                        },
+
+                        post: function ( $scope, iElems, iAttrs ) {
+                            console.log($scope.i, " :post link executed!");
+                        }
+                    };
+                },
+
+                // here this link function is the same as what compile returns in post
+                link: function ($scope, iElems, iAttrs) { //iElems: means instance DOM
+                    iElems.on("click",function () {
+                        alert('t clicked');
+                    });
+                }
+                // if we have both compile and link together, only compile will be executed and link will be totally ignored!
+
+            //    normally we do not need to write compile phase, better to write post link only
+            };
+        });
+
+        app.directive("myClass", function () {
+            return {
+                restrict: "C",
+                template: "<p> This is an class directive </p>",
+                compile: function () {
+                    console.log("my-class compile executed");
+                    return {
+                        pre: function () {
+                            console.log("my-class pre link executed");
+
+                        },
+                        post: function () {
+                            console.log("my-class post link executed");
+                        }
+                    };
+                }
+            };
+        });
+
+        app.directive("myComment", function () {
+            return {
+                restrict: "M",
+                template: "<p> This is an comment directive </p>",
+                replace: true
+            };
+        });
+
+    </script>
+</head>
+<body ng-app="mainApp">
+
+    <div class="container" ng-controller="mainCtrl">
+        <h1> Custom Directive</h1>
+        <hr>
+
+        <p>Name in mainCtrl: {{ name }}</p>
+
+        <h2>Attribute Directive</h2>
+        <!--create a custom directive and use it as an attribute-->
+        <div my-attr></div> <!--here div is a host element for out directive-->
+
+        <h2>Element Directive</h2>
+        <my-elem></my-elem>
+        <h2>Isolated Elem</h2>
+        <isolated-elem parent-name="{{name}}" parent-person="person" parent-display-person="displayPerson()"></isolated-elem>
+
+        <h2>another elem-1</h2>
+        <another-elem ng-repeat="i in arr" i="i"><span>Contents from Parent</span></another-elem>  <!-- It's a template-->
+
+        <h2>another elem-2</h2>
+        <another-elem><div class="my-class"></div></another-elem>
+
+
+        <h2>Class Directive</h2>
+            <div class="my-class"></div>
+
+        <h2>Comment Directive</h2>
+        <!-- directive: my-comment -->
+
+        <!--not recommend to use class and comment directives since they will slow down the process-->
+
+
+
+
+    </div>
+</body>
+</html>

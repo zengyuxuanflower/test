@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo 10</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script type="text/javascript" src="js/angular-route.min.js"></script>
+    <script>
+        var app = angular.module("mainApp", ['ngRoute']);
+        app.controller("mainCtrl", ["$scope", function($scope) {
+            $scope.person = {
+                name: "Bob"
+            };
+
+            $scope.count = 100;
+        }]);
+
+        app.config(["$routeProvider", function ($routeProvider) {
+            $routeProvider.when("/home", {
+                templateUrl: "template/home.html",
+                controller: "homeCtrl"
+            }).when("/menu1", {
+                templateUrl: "template/menu1.html",
+                controller: "menu1Ctrl"
+            }).when("/menu2/:info", { //: means variable
+                templateUrl: "template/menu2.html",
+                controller: "menu2Ctrl"
+            }).otherwise({
+                redirectTo: "/home"
+            });
+
+        }]);
+
+        app.controller("homeCtrl", ["$scope", function ($scope) {
+            $scope.count = 200; // inherits mainCtrl
+
+        }]);
+
+        app.controller("menu1Ctrl", ["$scope", function ($scope) {
+
+        }]);
+
+        app.controller("menu2Ctrl", ["$scope", "$routeParams", function ($scope, $routeParams) {
+            $scope.info = $routeParams.info;
+
+        }]);
+        // all are inheriting from mainCtrl
+    </script>
+</head>
+<body ng-app="mainApp">
+    <div class="container" ng-controller="mainCtrl">
+        <h1>Angular Routing</h1>
+            <nav>
+                <!--use # to prevent it from reloading to different pages-->
+                <a href="#home">Home</a>
+                <a href="#menu1">Menu1</a>
+                <a href="#menu2/bob">Menu2</a>
+            </nav>
+        <div ng-view>
+            <!--a place holder for the content-->
+
+        </div>
+    </div>
+</body>
+</html>

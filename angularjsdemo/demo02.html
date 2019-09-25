@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo02</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script>
+        var app = angular.module("mainApp", []);
+        app.controller("mainCtrl", ["$scope", "$log", function ($scope, $log) {
+            $scope.itemList = [
+                {itemNo: "A001", price: 10, qty: 30, inStock: true},
+                {itemNo: "A002", price: 20, qty: 10, inStock: true},
+                {itemNo: "A003", price: 30, qty: 0, inStock: false},
+                {itemNo: "A004", price: 15, qty: 55, inStock: true}
+            ];
+           $scope.delete = function ($index) {
+                $scope.itemList.splice($index, 1);
+                };
+           $scope.person = {
+               firstname: "",
+               lastname: "",
+               getfullName: function () {
+                   return this.firstname + " " + this.lastname;
+
+               }
+
+           }
+        }] ); // list all the constructor functions in the array, angular will rely on the strings here to do dependency injection
+    </script>
+</head>
+<body ng-app="mainApp">
+    <div class="container" ng-controller="mainCtrl">
+        <h1>Advanced Binding</h1>
+        <hr>
+        <h2>Binding for collection</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Item Number</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>In Stock</th>
+                    <th>Operation</th>
+                </tr>
+            </thead>
+            <tbody>
+            <!--powerful part, automatically for loop inside this template-->
+                <tr ng-repeat="item in itemList">
+                    <td>{{ item.itemNo }}</td>
+                    <td>{{ item.price }}</td>
+                    <td>{{ item.qty }}</td>
+                    <td><input type="checkbox" ng-model="item.inStock" ng-disabled="true"></td>
+                    <td>
+                        <!--$index can be used anywhere inside ng-repeat-->
+                        {{$index}}<button class="btn btn-link" ng-click="delete($index)">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr>
+        <h2>Binding for Object</h2>
+        <p>First Name: <input type="text" ng-model="person.firstname"></p>
+        <p>Last Name: <input type="text" ng-model="person.lastname"></p>
+        <!--can bind it separately, very convenient-->
+        <p>Full Name: {{person.getfullName() }}</p>
+
+        <hr>
+        <h2>Conditional Binding</h2>
+        <div>
+            <!--show-->
+            <p><input type="checkbox" ng-model="toShow">Show</p>
+            <p ng-show="toShow">Content to be shown</p>
+
+            <!--hide-->
+            <p><input type="checkbox" ng-model="toHide">Hide</p>
+            <p ng-hide="toHide">Content to be hidden</p>
+
+            <!--display-->
+            <p><input type="checkbox" ng-model="toDisplay">Display</p>
+            <p ng-if="toDisplay">Content to display</p>
+
+            <!--interview point-->
+
+            <!--ng-show is using css display none feature-->
+            <!--ng-if: dynamically to add or remove from the DOM tree, DOM manipulation-->
+
+        </div>
+
+    </div>
+
+</body>
+</html>

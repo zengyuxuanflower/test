@@ -1,0 +1,12 @@
+<h3>Edit an employee</h3>
+
+<div ng-if="currentEmployee">
+
+    <p>Name: <br><input type="text" ng-model="currentEmployee.name" size="100" disabled="disabled"></p>
+    <p>Age: <br><input type="text" ng-model="currentEmployee.age" size="100" ></p>
+    <p>City: <br><input type="text" ng-model="currentEmployee.address.city" size="100" ></p>
+    <p>State: <br><input type="text" ng-model="currentEmployee.address.state" size="100" ></p>
+    <button class="btn btn-primary" id="edit" ng-click="editCurrentEmployee(currentEmployee)">Submit</button>
+</div>
+
+<a href="#home">Back</a>

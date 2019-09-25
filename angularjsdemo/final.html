@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Final</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script>
+        var app = angular.module("mainApp",[])
+
+        app.controller("firstCtrl", ["$scope", function($scope){
+            $scope.person = {
+                name: "Alice",
+                age: 22
+            }
+        }]);
+
+        app.controller("secondCtrl", ["$scope", "firstService","secondService", "thirdService","fourthService",'fifthService',
+            function($scope, firstService, secondService, thirdService, fourthService, fifthService){
+            $scope.firstService = firstService;
+            $scope.secondService = secondService;
+            $scope.thirdService = thirdService;
+            $scope.fourthService = fourthService;
+            $scope.fifthService = fifthService;
+        }]);
+
+        app.constant("firstService", {
+            name: "Bob1",
+            age: 21
+        });
+
+        app.service("secondService", function () {
+            this.name= "Bob2";
+            this.age=21;
+        });
+
+        app.factory("thirdService", function(){
+
+            return {
+                name: "Bob3",
+                age: 21
+            }
+        });
+
+        app.provider("fourthService", function () { // a constructor function for creating service provider
+
+            this.$get = function () { // a factory function, return an object (the service)
+                return {
+                    name: "Bob4",
+                    age: 21
+
+                };
+            };
+
+        });
+
+        app.value('fifthService', {
+            name: "Bob1",
+            age: 21
+        });
+
+        app.config(function ($provide) {
+            $provide.decorator('fifthService', function () {
+                return {
+                    name: "Bob5",
+                    age: 21
+                } ;
+            });
+        });
+
+        // A constant is a value that can be injected everywhere. The value of a constant can never be changed.
+        // A value is just a simple injectable value.
+        // A service is an injectable constructor.
+        // A factory is an injectable function.
+        // A decorator can modify or encapsulate other providers except a constant.
+        // A provider is a configurable factory.
+
+    </script>
+</head>
+<body ng-app="mainApp">
+    <div class="container" ng-controller="firstCtrl">
+        <p>This is the data from the first controller:</p>
+        <p>name: {{person.name}}</p>
+        <p>age: {{person.age}}</p>
+    </div>
+
+    <div class="container" ng-controller="secondCtrl">
+        <hr>
+        <p>This is the data from the second controller:</p>
+        <p>name from firstService: {{firstService.name}}</p>
+        <p>age from firstService: {{firstService.age}}</p>
+
+        <hr>
+        <p>name from secondService: {{secondService.name}}</p>
+        <p>age from secondService: {{secondService.age}}</p>
+
+        <hr>
+        <p>name from thirdService: {{thirdService.name}}</p>
+        <p>age from thirdService: {{thirdService.age}}</p>
+
+
+        <hr>
+        <p>name from fourthService: {{fourthService.name}}</p>
+        <p>age from fourthService: {{fourthService.age}}</p>
+
+        <hr>
+        <p>fifthService: {{fifthService}}</p>
+    </div>
+</body>
+</html>

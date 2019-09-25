@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo09</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script type="text/javascript" src="js/angular.min.js"></script>
+
+    <script>
+        var app = angular.module("mainApp", []);
+        app.controller("mainCtrl", ["$scope", "personService","myService","myFactory","myp",function($scope, personService, myService, myFactory, myp){
+            $scope.person = personService; // bind the personService to $scope
+            $scope.myService = myService; // declare myService using $scope, ortherwise can only use my Service in this function!!
+            $scope.myFactory = myFactory;
+
+             $scope.$watch("mainCount", function (newVal) {
+                 $scope.myFactory.setCount(newVal);
+
+             });
+
+             $scope.myp = myp;
+        }]);
+
+    //    app.constant vs app.value: both can be used to create service object injected as a service
+    //    immutable vs constant: cannot change any object properties in object, constant means the reference cannot be changed
+
+    //    app.value: inject service created by value into app.config to change the service object reference
+
+        //     create service outside the controller,  object literal
+        app.value("personService", { //personService is an object
+
+            name: "Bob",
+            sayHello: function () {
+                return "Hello, " + this.name;
+
+            }
+        });
+
+        app.service("myService", function () { // the constructor function, angular will use the new keyword to create to service object
+            this.message = "This is my service";
+            this.getCount = function () {
+                return 100;
+            };
+        });
+
+        app.factory("myFactory", function () { // use the factory function: angular won't use "new" keyword,
+            // angular will invoke this function directly and return an object as the service object
+
+            //encapsulation
+            var count = 0; //closure: {count:0}
+            return {
+                name: "This is a factory",
+                getCount: function() {
+                    return count;
+
+                },
+
+                setCount: function (c) {
+                    count = c;
+                }
+            };
+        });
+
+        // var mypProvider = new C();
+        // var myp = mypProvider.$get();
+        // myProvider.prefix
+
+        app.provider("myp", function () { // a constructor function for creating service provider
+            this.prefix = "Mr. ";
+            this.$get = function () { // a factory function, return an object (the service)
+                var that = this;
+                return {
+                    name: "This is a provider. ",
+                    getName: function () {
+                        return that.prefix + this.name;
+                    }
+                };
+            };
+
+        });
+
+        app.config(["mypProvider", function (mypProvider) {
+            mypProvider.prefix = "Miss.";
+        }]);
+
+    </script>
+</head>
+<body ng-app="mainApp">
+    <div class="container" ng-controller="mainCtrl">
+        <h1>Angular Services</h1>
+        <hr>
+
+        <!--5 ways to create services, interview point-->
+        <h2>1. Use value/constant to create service(object literal)</h2>
+        <p>Name: {{ person.name }}</p>
+        <p>{{ person.sayHello() }}</p>
+
+        <h2>2. Use service to create service</h2>
+        <p>Message: {{ myService.message }}</p>
+        <p>Count: {{ myService.getCount() }}</p>
+
+        <h2>3. Use factory to create service</h2>
+        <p>Name: {{ myFactory.name }}</p>
+        <p>Count: {{ myFactory.getCount() }}</p>
+
+        <h2>4. </h2>
+        <p><input type="number" ng-model="mainCount"></p>
+
+        <h2>5. Use provider to create service</h2>
+        <p>Name: {{ myp.getName()}}</p>
+
+    </div>
+
+</body>
+</html>

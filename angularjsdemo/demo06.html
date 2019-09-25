@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo06</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script>
+        var app = angular.module("mainApp", []);
+        app.controller("mainCtrl", ["$scope", function ($scope) {
+            $scope.money = 100;
+
+            $scope.message = "Hello World!";
+
+            $scope.orderList = [
+                {id: 10, name: "Laptop", qty: 20, price: 100},
+                {id: 20, name: "Rasor", qty: 2, price: 350},
+                {id: 30, name: "Desk", qty: 50, price: 20},
+                {id: 40, name: "Microwave", qty: 25, price: 30},
+                {id: 50, name: "Suitecase", qty: 32, price: 71},
+            ];
+            $scope.col="id";
+            $scope.des=false;
+            $scope.changeOrderByCol = function (col) {
+                $scope.col = col;
+                $scope.des = !$scope.des;
+            };
+            $scope.$watch("filterObj.price", function(newVal){
+                if(newVal === null){
+                $scope.filterObj.price = undefined;
+                }
+            });
+
+            $scope.$watch("filterObj.qty", function(newVal){
+                if(newVal === null){
+                    $scope.filterObj.qty = undefined;
+                }
+            });
+                // $scope.orderList.sort(function(o1, o2){
+                //     return  o1[col] - o2[col];
+                // });
+            //    use orderby in Angular to sort
+
+        }]);
+
+        app.filter("reverse", function () { // here we customize a pipe by using filter, filter will return a function
+            return function (str) {
+                return str.split('').reverse().join('');
+
+            }
+        });
+        app.filter("priceFilter", function(){ // filter's constructor function
+            //    filter is function
+            // receive items first then after some process, return the items
+            return function (items, min, max) {
+                min = min || 0;
+                max = max || Number.MAX_VALUE;
+                return items.filter(function (item) {
+                    return item.price >= min && item.price <= max; // item out of this range will not be kept
+                });
+            };
+        });
+
+    </script>
+</head>
+<body ng-app="mainApp">
+    <div class="container" ng-controller="mainCtrl">
+        <h1>AngularJS filters</h1>
+        <hr>
+        <h2>Built in Filters</h2>
+        <p>{{ money | currency }}</p>
+        <!--we have a currency filter here, it will turn 100 to a $100, can be changed later-->
+        <!--filter , called pipe in Angular 4 or 5-->
+        <!--several pipes built in in Angular, we can also build customized pipes and share to others-->
+        <p>{{ message | lowercase | reverse }}</p>
+
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th><button class="btn btn-link" ng-click="changeOrderByCol('id')">ID</button></th>
+                <th><button class="btn btn-link" ng-click="changeOrderByCol('name')">Name</button></th>
+                <th><button class="btn btn-link" ng-click="changeOrderByCol('qty')">Quantity</button></th>
+                <th><button class="btn btn-link" ng-click="changeOrderByCol('price')">Price</button></th>
+                <th><button class="btn btn-link" ng-click="changeOrderByCol('price*qty')">Value</button></th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr ng-repeat="order in orderList | orderBy: col : des | filter: word | filter: filterObj | priceFilter : minPrice : maxPrice">
+                <!--pass these filters to the function-->
+                <td>{{ order.id }}</td>
+                <td>{{ order.name }}</td>
+                <td>{{ order.qty }}</td>
+                <td>{{ order.price }}</td>
+                <td>{{ order.qty * order.price }}</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div>
+            <p>Filter by word: <input type="text" ng-model="word"></p>
+            <p>Filter by price: <input type="number" ng-model="filterObj.price"></p>
+            <p>Filter by qty: <input type="number" ng-model="filterObj.qty"></p>
+            <p>{{ filterObj }}</p>
+            <p>Min Price: <input type="number" ng-model="minPrice"></p>
+            <p>Max Price: <input type="number" ng-model="maxPrice"></p>
+
+        </div>
+
+    </div>
+</body>
+</html>
